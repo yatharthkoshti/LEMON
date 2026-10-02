@@ -1,0 +1,76 @@
+@import 'leaflet/dist/leaflet.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  
+  input, textarea {
+    user-select: text;
+  }
+
+  body {
+    background-color: #F7F8FA;
+    color: #111111;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+}
+
+/* Custom scrollbar hiding for horizontal tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Big Anton Heading typography */
+.font-anton {
+  font-family: 'Anton', Arial, sans-serif;
+  letter-spacing: 0.03em;
+}
+
+/* Regional fonts fallback */
+.font-gujarati {
+  font-family: 'Noto Sans Gujarati', Arial, sans-serif;
+}
+
+.font-hindi {
+  font-family: 'Noto Sans Devanagari', Arial, sans-serif;
+}
+
+/* Slide-in animation for menus */
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Ensure leaflet controls don't overlap bottom sheet */
+.leaflet-control-zoom {
+  margin-top: 80px !important;
+}
+
+/* Full-screen map container */
+.map-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
