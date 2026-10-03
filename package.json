@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tunnel": "lt --port 5173 --subdomain lemon-market"
+    "tunnel": "lt --port 5173 --subdomain lemon-market",
+    "deploy": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy_ghpages.ps1"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.22",
