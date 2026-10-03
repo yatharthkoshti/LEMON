@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="lemonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF275" />
+      <stop offset="100%" stop-color="#FFD54A" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#111111" flood-opacity="0.15" />
+    </filter>
+  </defs>
+  <!-- Background Rounded Squircle -->
+  <rect width="512" height="512" rx="128" fill="#111111" />
+  
+  <!-- Lemon Slice / Body -->
+  <circle cx="256" cy="265" r="170" fill="url(#lemonGrad)" filter="url(#shadow)" />
+  <circle cx="256" cy="265" r="148" fill="#FFF9E0" stroke="#FFD54A" stroke-width="6" />
+  
+  <!-- Segments -->
+  <path d="M 256 140 A 125 125 0 0 1 350 180 L 256 265 Z" fill="#FFD54A" />
+  <path d="M 370 205 A 125 125 0 0 1 380 300 L 256 265 Z" fill="#FFD54A" />
+  <path d="M 360 325 A 125 125 0 0 1 290 385 L 256 265 Z" fill="#FFD54A" />
+  <path d="M 256 390 A 125 125 0 0 1 165 350 L 256 265 Z" fill="#FFD54A" />
+  <path d="M 145 325 A 125 125 0 0 1 135 230 L 256 265 Z" fill="#FFD54A" />
+  <path d="M 155 205 A 125 125 0 0 1 225 145 L 256 265 Z" fill="#FFD54A" />
+  
+  <!-- Hard Hat / Worker Emblem in Center -->
+  <circle cx="256" cy="265" r="46" fill="#111111" />
+  <path d="M 230 260 C 230 240 282 240 282 260 Z" fill="#FFD54A" />
+  <rect x="222" y="260" width="68" height="6" rx="3" fill="#FFD54A" />
+  <rect x="250" y="244" width="12" height="14" rx="2" fill="#FFFFFF" />
+  
+  <!-- Brand text LEMON -->
+  <text x="256" y="465" font-family="'Anton', Arial, sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">LEMON</text>
+</svg>
