@@ -12,6 +12,7 @@ import { WorkerCheckInModal } from './components/worker/WorkerCheckInModal';
 // Worker Screens
 import { AuthScreen } from './screens/AuthScreen';
 import { LanguageSelectScreen } from './screens/LanguageSelectScreen';
+import { RoleSelectionScreen } from './screens/RoleSelectionScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { WorkerMapHome } from './screens/WorkerMapHome';
 import { JobsScreen } from './screens/JobsScreen';
@@ -29,6 +30,7 @@ import { PosterWorkersScreen } from './screens/poster/PosterWorkersScreen';
 import { PosterAnalyticsScreen } from './screens/poster/PosterAnalyticsScreen';
 import { PosterProfileScreen } from './screens/poster/PosterProfileScreen';
 import { PosterRoleSelectModal } from './screens/poster/PosterRoleSelectModal';
+import { AdminDashboardScreen } from './screens/admin/AdminDashboardScreen';
 
 export const App: React.FC = () => {
   const { 
@@ -42,7 +44,8 @@ export const App: React.FC = () => {
     closeJobDetails,
     checkInModalJob,
     setCheckInModalJob,
-    hasSelectedPosterRole
+    hasSelectedPosterRole,
+    hasSelectedRole
   } = useAppStore();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -69,11 +72,31 @@ export const App: React.FC = () => {
     );
   }
 
+  
+  // 2.5 Role Selection Flow
+  if (!hasSelectedRole) {
+    return (
+      <div className="min-h-screen bg-background text-primary">
+        <RoleSelectionScreen />
+        <Toast />
+      </div>
+    );
+  }
   // 3. Worker Onboarding Flow (if in worker portal and not yet onboarded)
   if (!isOnboarded && currentPortal === 'worker') {
     return (
       <div className="min-h-screen bg-background text-primary">
         <OnboardingScreen />
+        <Toast />
+      </div>
+    );
+  }
+
+  // 3.5 ADMIN PORTAL
+  if (currentPortal === 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-100 text-primary">
+        <AdminDashboardScreen />
         <Toast />
       </div>
     );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, ArrowLeftRight, Download } from 'lucide-react';
+import { Globe, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../store/useAppStore';
 import { Language } from '../../types';
@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   onInstallClick
 }) => {
   const { t } = useTranslation();
-  const { language, setLanguage, isAvailableToday, setPortal } = useAppStore();
+  const { language, setLanguage, isAvailableToday } = useAppStore();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
   const languages: { code: Language; label: string; script: string }[] = [
@@ -58,18 +58,8 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Right Actions: Portal Switcher + Language Selector */}
+        {/* Right Actions: Language Selector */}
         <div className="flex items-center gap-2">
-          {/* Switch to Job Poster */}
-          <button
-            onClick={() => setPortal('job_poster')}
-            className="px-2.5 py-1.5 rounded-full bg-amber-50 border border-amber-300 text-amber-950 font-bold text-xs flex items-center gap-1 shadow-2xs hover:bg-amber-100 active:scale-95 transition-all"
-            title={t('portal.switch_to_poster')}
-          >
-            <ArrowLeftRight className="w-3.5 h-3.5 text-primary" />
-            <span className="font-extrabold">Poster 🏢</span>
-          </button>
-
           {/* Quick Language Switcher Dropdown */}
           <div className="relative">
             <button

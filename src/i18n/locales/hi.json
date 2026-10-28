@@ -449,5 +449,91 @@
     "no_posted_jobs": "अभी कोई काम पोस्ट नहीं। + दबाएँ!",
     "quick_stats": "तेज़ आँकड़े",
     "quick_actions": "तेज़ कार्रवाई"
+  },
+  "onboarding_v2": {
+    "step1_title": "आप कैसे काम करेंगे?",
+    "step1_subtitle": "चुनें कि आप Lemon से कैसे जुड़ना चाहते हैं.",
+    "step2_title": "आपका काम क्या है?",
+    "step2_subtitle": "अपनी सभी स्किल्स चुनें.",
+    "step3_title_individual": "काम के लिए तैयार!",
+    "step3_title_group": "अपनी टीम जोड़ें",
+    "step3_subtitle_group": "अपने {{unitType}} में सदस्य जोड़ें.",
+    "step3_empty": "टीम सदस्य जोड़ने के लिए 'जोड़ें' टैप करें",
+    "all_set": "आप तैयार हैं!",
+    "all_set_subtitle": "आपके पास के काम खोजने को तैयार.",
+    "continue": "आगे",
+    "start_finding": "काम खोजना शुरू करें",
+    "add": "जोड़ें",
+    "invite_via_link": "लिंक से आमंत्रित करें",
+    "type_individual": "व्यक्तिगत",
+    "type_group": "ग्रुप",
+    "type_family": "परिवार",
+    "type_friends": "दोस्त",
+    "member_name": "नाम",
+    "per_day": "/दिन"
+  },
+  "create_job_v2": {
+    "title": "काम बनाएं",
+    "job_title_label": "काम का शीर्षक",
+    "job_title_placeholder": "जैसे निर्माण के लिए मिस्त्री",
+    "who_needed": "आपको किसकी जरूरत है?",
+    "individuals_only": "केवल व्यक्तिगत",
+    "groups": "ग्रुप",
+    "families": "परिवार",
+    "friends": "दोस्त",
+    "any_mixed": "कोई भी/मिश्रित",
+    "workers_needed": "कुल आवश्यक मजदूर",
+    "custom": "कस्टम",
+    "daily_wage_label": "दैनिक मजदूरी (प्रति मजदूर)",
+    "review_post": "समीक्षा और पोस्ट",
+    "total_workers": "कुल मजदूर",
+    "daily_wage": "दैनिक मजदूरी",
+    "estimated_total": "अनुमानित कुल",
+    "payment_note": "इस MVP संस्करण में भुगतान सीधे लिया जाएगा.",
+    "continue_review": "समीक्षा के लिए आगे",
+    "post_now": "अभी काम पोस्ट करें"
+  },
+  "group_timer": {
+    "active_job_title": "चालू काम",
+    "active_job_block": "नए काम के लिए आवेदन करने से पहले चालू काम पूरा करें.",
+    "acceptance_pending": "ग्रुप स्वीकृति बाकी",
+    "expired": "ग्रुप आमंत्रण समाप्त",
+    "view_active": "चालू काम देखें",
+    "make_all_accept": "सबको काम स्वीकार करवाएं",
+    "accepted": "स्वीकृत",
+    "pending": "बाकी",
+    "timer_remaining": "{{time}} बाकी"
+  },
+  "work_unit": {
+    "individual": "व्यक्तिगत",
+    "group": "ग्रुप",
+    "family": "परिवार",
+    "friends": "दोस्त",
+    "mixed": "मिश्रित",
+    "any": "कोई भी"
+  },
+  "transport": {
+    "provided": "परिवहन उपलब्ध",
+    "not_provided": "अपना परिवहन",
+    "toggle_label": "परिवहन"
+  },
+  "dispute": {
+    "report_title": "विवाद की रिपोर्ट करें",
+    "report_desc": "यदि नियोक्ता ने भुगतान नहीं किया या कोई समस्या थी",
+    "reason_label": "क्या हुआ?",
+    "reason_no_payment": "नियोक्ता ने भुगतान नहीं किया",
+    "reason_wrong_wage": "सहमत से कम भुगतान किया",
+    "reason_unsafe": "असुरक्षित काम करने की स्थिति",
+    "reason_other": "अन्य समस्या",
+    "submit": "रिपोर्ट सबमिट करें",
+    "success": "विवाद की सफलतापूर्वक रिपोर्ट की गई"
+  },
+  "role_selection": {
+    "title": "आप लेमन का उपयोग कैसे करेंगे?",
+    "worker_title": "मैं कामगार हूं",
+    "worker_desc": "अपने पास काम खोजें",
+    "poster_title": "मैं जॉब पोस्टर हूं",
+    "poster_desc": "काम दें और कारीगर रखें",
+    "continue": "आगे बढ़ें"
   }
 }

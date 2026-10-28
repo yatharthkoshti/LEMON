@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ArrowLeft, MapPin, Calendar, Clock, Users, IndianRupee, 
-  CheckCircle2, Clock3, AlertCircle, ShieldCheck, FileText 
+  CheckCircle2, Clock3, AlertCircle, ShieldCheck, FileText, Phone, MessageSquare
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Job } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { OpenStreetMap } from '../../components/map/OpenStreetMap';
+import { useAppStore } from '../../store/useAppStore';
+import { GroupChatModal } from '../../components/jobs/GroupChatModal';
 
 interface PosterJobDetailScreenProps {
   job: Job;
@@ -18,6 +20,8 @@ export const PosterJobDetailScreen: React.FC<PosterJobDetailScreenProps> = ({
   onBack
 }) => {
   const { t } = useTranslation();
+  const { workers } = useAppStore();
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <div className="space-y-5 pb-20">
@@ -145,25 +149,39 @@ export const PosterJobDetailScreen: React.FC<PosterJobDetailScreenProps> = ({
 
         {job.assignedWorkers.length > 0 ? (
           <div className="space-y-2.5">
-            {job.assignedWorkers.map((w, idx) => (
-              <div
-                key={idx}
-                className="p-3 bg-gray-50 rounded-2xl flex items-center justify-between border border-gray-100"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Initials badge - PRIVACY SAFE: NO photo */}
-                  <div className="w-9 h-9 rounded-xl bg-accent/30 font-heading text-primary font-bold flex items-center justify-center text-sm">
-                    {w.workerName.substring(0, 2)}
+            {job.assignedWorkers.map((w, idx) => {
+              const matchedWorker = workers.find((wk) => wk.id === w.workerId || wk.name === w.workerName);
+              const worker = {
+                name: w.workerName,
+                photoUrl: w.photoUrl ?? matchedWorker?.photoUrl,
+                phone: w.phone ?? matchedWorker?.phone ?? '9825011223',
+              };
+
+              return (
+                <div
+                  key={idx}
+                  className="p-3 bg-gray-50 rounded-2xl flex items-center justify-between border border-gray-100"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-accent/20 flex items-center justify-center shrink-0">
+                      {worker.photoUrl ? (
+                        <img src={worker.photoUrl} alt={worker.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-bold text-sm">{worker.name.substring(0, 2)}</span>
+                      )}
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-bold text-primary">
+                        {worker.name}
+                      </h5>
+                      <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
+                        <Phone className="w-3 h-3" /> {worker.phone}
+                      </p>
+                      <span className="text-[11px] text-secondary capitalize">
+                        {w.skills.join(', ')}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h5 className="text-sm font-bold text-primary">
-                      {w.workerName}
-                    </h5>
-                    <span className="text-[11px] text-secondary capitalize">
-                      {w.skills.join(', ')}
-                    </span>
-                  </div>
-                </div>
 
                 <div className="text-right">
                   {w.status === 'checked_in' ? (
@@ -186,12 +204,26 @@ export const PosterJobDetailScreen: React.FC<PosterJobDetailScreenProps> = ({
                   )}
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         ) : (
           <p className="text-xs text-gray-500 py-3 text-center">
             હજુ કોઈ શ્રમિક જોડાયો નથી. શ્રમિક ટેબમાંથી સીધા ફાળવી શકો છો.
           </p>
+        )}
+
+        {job.assignedWorkers.length > 0 && (
+          <div className="pt-2">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => setChatOpen(true)}
+              leftIcon={<MessageSquare className="w-5 h-5 text-accent" />}
+            >
+              Open Temporary Group Chat ({job.assignedWorkers.length + 1} People)
+            </Button>
+          </div>
         )}
       </div>
 
@@ -212,6 +244,13 @@ export const PosterJobDetailScreen: React.FC<PosterJobDetailScreenProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Group Chat Modal */}
+      <GroupChatModal
+        job={job}
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
     </div>
   );
 };

@@ -56,10 +56,10 @@ export const HomeScreen: React.FC = () => {
         </div>
 
         {/* Group / Individual Badge */}
-        {profile.groupDetails?.isGroup ? (
+        {(profile.workUnitType !== 'individual') ? (
           <div className="bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-2xs">
             <Users className="w-3.5 h-3.5 text-primary" />
-            <span>{profile.groupDetails.memberCount} ટીમ લીડર</span>
+            <span>{(profile.members.length + 1)} ટીમ લીડર</span>
           </div>
         ) : (
           <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-2xl flex items-center gap-1.5 text-xs font-bold shadow-2xs">

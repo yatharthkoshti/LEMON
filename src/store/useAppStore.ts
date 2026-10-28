@@ -2,10 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { 
   Language, WorkerProfile, Job, NotificationItem, NavigationTab, 
-  UserRole, PosterType, PosterProfile, PosterTab, JobAssignment 
+  UserRole, PosterType, PosterProfile, PosterTab, JobAssignment, ChatMessage, DisputeRecord 
 } from '../types';
 import { INITIAL_JOBS, INITIAL_NOTIFICATIONS } from '../data/sampleJobs';
 import { SAMPLE_WORKERS } from '../data/sampleWorkers';
+import { SAMPLE_POSTERS } from '../data/samplePosters';
 import i18n from '../i18n';
 
 interface ToastState {
@@ -17,6 +18,8 @@ interface AppState {
   // Current active portal
   currentPortal: UserRole;
   setPortal: (portal: UserRole) => void;
+  hasSelectedRole: boolean;
+  completeRoleSelection: () => void;
 
   // Auth & General
   isAuthenticated: boolean;
@@ -48,9 +51,20 @@ interface AppState {
   toast: ToastState | null;
   speechEnabled: boolean;
 
+  chatMessages: ChatMessage[];
+  sendChatMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
+
   // Worker Check-In Modal State
   checkInModalJob: Job | null;
   setCheckInModalJob: (job: Job | null) => void;
+
+  
+  // Group / Work Unit Actions
+  setWorkUnitType: (type: import('../types').WorkUnitType) => void;
+  setUnitName: (name: string) => void;
+  addGroupMember: (member: import('../types').GroupMember) => void;
+  updateGroupMember: (memberId: string, updates: Partial<import('../types').GroupMember>) => void;
+  removeGroupMember: (memberId: string) => void;
 
   // Actions
   login: (phone: string) => void;
@@ -87,49 +101,70 @@ interface AppState {
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   toggleSpeechEnabled: () => void;
-  logout: () => void;
+    logout: () => void;
+
+  // Admin & Management
+  posters: PosterProfile[];
+  disputes: DisputeRecord[];
+  approveJobPayment: (jobId: string) => void;
+  cancelJobByAdmin: (jobId: string, reason?: string) => void;
+  verifyPoster: (posterId: string) => void;
+  addDispute: (dispute: Omit<DisputeRecord, 'id' | 'createdAt'>) => void;
 }
 
+
+const INITIAL_DISPUTES: DisputeRecord[] = [
+  {
+    id: 'disp-01',
+    ticketId: 'TICKET-784102',
+    jobId: 'job-101',
+    jobTitle: 'રાજ મિસ્ત્રી અને પ્લાસ્ટર કામ (Raj Mistri Construction)',
+    company: 'શિવાલય ઇન્ફ્રાસ્ટ્રક્ચર',
+    workerId: 'worker-001',
+    workerName: 'રમેશભાઈ પરમાર (Ramesh P.)',
+    workerPhone: '98250 11223',
+    category: 'અધૂરું વેતન (Partial Wage Payment)',
+    disputedAmount: 400,
+    statement: 'કામ પૂરું કર્યા પછી શેઠે ₹1200 માંથી ₹800 જ આપ્યા અને ₹400 બાકી રાખ્યા છે.',
+    status: 'open',
+    createdAt: 'આજે સવારે ૧૦:૩૦'
+  }
+];
+
 const DEFAULT_PROFILE: WorkerProfile = {
-  id: 'worker-001',
-  name: 'રમેશભાઈ પરમાર (Ramesh Parmar)',
-  phone: '98250 11223',
+  id: 'worker-empty',
+  name: '',
+  phone: '',
   photoUrl: '',
-  city: 'અમદાવાદ (Ahmedabad)',
+  city: '',
   locationCoords: { lat: 23.0225, lng: 72.5714 },
-  skills: ['raj_mistri', 'tile_karigar'],
-  experience: '3-5',
-  availability: ['morning', 'afternoon', 'weekdays'],
-  dailyWage: 1200,
-  groupDetails: {
-    isGroup: false,
-    teamName: '',
-    leaderName: 'રમેશભાઈ પરમાર',
-    memberCount: 1,
-    memberSkills: ['raj_mistri'],
-    wagePerMember: 1200,
-    totalDailyWage: 1200
-  },
-  attendanceRate: 98,
-  completedJobsCount: 46,
-  joinedDate: 'જાન્યુઆરી ૨૦૨૪',
-  rating: 4.9,
-  languages: ['gu', 'hi']
+  skills: [],
+  experience: '0-1',
+  availability: [],
+  dailyWage: 0,
+  workUnitType: 'individual',
+  unitName: '',
+  members: [],
+  attendanceRate: 100,
+  completedJobsCount: 0,
+  joinedDate: '',
+  rating: 5.0,
+  languages: []
 };
 
 const DEFAULT_POSTER: PosterProfile = {
-  id: 'poster-01',
-  name: 'વિજયભાઈ પટેલ (Vijay Patel)',
-  companyName: 'શિવાલય ઇન્ફ્રાસ્ટ્રક્ચર (Shivalay Infra)',
-  posterType: 'business',
-  city: 'અમદાવાદ (Ahmedabad)',
-  email: 'vijay@shivalayinfra.com',
-  phone: '98250 12345',
+  id: 'poster-empty',
+  name: '',
+  companyName: '',
+  posterType: 'individual',
+  city: '',
+  email: '',
+  phone: '',
   locationCoords: { lat: 23.0135, lng: 72.5085 },
-  verified: true,
-  totalJobsPosted: 14,
-  activeJobsCount: 2,
-  totalSpent: 48500
+  verified: false,
+  totalJobsPosted: 0,
+  activeJobsCount: 0,
+  totalSpent: 0
 };
 
 export const useAppStore = create<AppState>()(
@@ -137,6 +172,8 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       currentPortal: 'worker',
       setPortal: (portal) => set({ currentPortal: portal }),
+      hasSelectedRole: false,
+      completeRoleSelection: () => set({ hasSelectedRole: true }),
 
       isAuthenticated: false,
       phone: '',
@@ -174,6 +211,8 @@ export const useAppStore = create<AppState>()(
 
       jobs: INITIAL_JOBS,
       workers: SAMPLE_WORKERS,
+      posters: SAMPLE_POSTERS,
+      disputes: INITIAL_DISPUTES,
       selectedJobForDetails: null,
       notifications: INITIAL_NOTIFICATIONS,
       activeTab: 'home',
@@ -181,6 +220,31 @@ export const useAppStore = create<AppState>()(
       speechEnabled: true,
       checkInModalJob: null,
       setCheckInModalJob: (job) => set({ checkInModalJob: job }),
+      chatMessages: [],
+      sendChatMessage: (message) => {
+        const newMessage = {
+          ...message,
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          timestamp: new Date().toISOString()
+        };
+        set((state) => ({ chatMessages: [...state.chatMessages, newMessage] }));
+      },
+
+      
+      setWorkUnitType: (type) => set((state) => ({ profile: { ...state.profile, workUnitType: type } })),
+      setUnitName: (name) => set((state) => ({ profile: { ...state.profile, unitName: name } })),
+      addGroupMember: (member) => set((state) => ({
+        profile: { ...state.profile, members: [...state.profile.members, member] }
+      })),
+      updateGroupMember: (memberId, updates) => set((state) => ({
+        profile: {
+          ...state.profile,
+          members: state.profile.members.map(m => m.id === memberId ? { ...m, ...updates } : m)
+        }
+      })),
+      removeGroupMember: (memberId) => set((state) => ({
+        profile: { ...state.profile, members: state.profile.members.filter(m => m.id !== memberId) }
+      })),
 
       login: (phone: string) => {
         set({ phone });
@@ -390,6 +454,7 @@ export const useAppStore = create<AppState>()(
         const netWorkerPayout = wage * count;
         const platformFee = Math.round(netWorkerPayout * 0.10); // 10% platform fee
         const totalJobCost = netWorkerPayout + platformFee;
+        const platformPostingFee = count * 20; // 20rs per person advance
 
         const newJob: Job = {
           id,
@@ -403,10 +468,13 @@ export const useAppStore = create<AppState>()(
           date: newJobData.date || 'આજે (Today)',
           time: newJobData.time || '૦૮:૩૦ સવારે - ૦૫:૩૦ સાંજે',
           dailyWage: wage,
+          transportProvided: newJobData.transportProvided ?? true,
+          voiceDescriptionUrl: newJobData.voiceDescriptionUrl,
           workersRequired: count,
+          requestedUnitTypes: newJobData.requestedUnitTypes || ['any'],
           workersAssignedCount: 0,
           status: 'upcoming',
-          paymentStatus: newJobData.paymentStatus || 'pending',
+          paymentStatus: newJobData.paymentStatus || 'pending_verification',
           totalJobCost,
           platformFee,
           netWorkerPayout,
@@ -541,10 +609,56 @@ export const useAppStore = create<AppState>()(
         set((state) => ({ speechEnabled: !state.speechEnabled }));
       },
 
+      approveJobPayment: (jobId: string) => {
+        set((state) => ({
+          jobs: state.jobs.map((job) => job.id === jobId ? {
+            ...job,
+            paymentStatus: 'paid' as const,
+            adminApproved: true,
+            timeline: [
+              ...job.timeline,
+              { timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), event: 'એડમિન દ્વારા ચુકવણી મંજૂર કરાઈ (Payment Approved by Admin)' }
+            ]
+          } : job)
+        }));
+      },
+
+      cancelJobByAdmin: (jobId: string, reason?: string) => {
+        set((state) => ({
+          jobs: state.jobs.map((job) => job.id === jobId ? {
+            ...job,
+            status: 'cancelled' as const,
+            paymentStatus: 'rejected' as const,
+            adminApproved: false,
+            cancellationReason: reason || 'ચુકવણી ના મળવાથી અથવા ખોટા સ્ક્રીનશોટને લીધે એડમિન દ્વારા કામ રદ કરવામાં આવ્યું છે.',
+            timeline: [
+              ...job.timeline,
+              { timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), event: `કામ રદ: ${reason || 'પેમેન્ટ બાકી / અમાન્ય'}` }
+            ]
+          } : job)
+        }));
+      },
+
+      verifyPoster: (posterId: string) => {
+        set((state) => ({
+          posters: state.posters.map((p) => p.id === posterId ? { ...p, verified: !p.verified } : p)
+        }));
+      },
+
+      addDispute: (disputeData: Omit<DisputeRecord, 'id' | 'createdAt'>) => {
+        const newDispute: DisputeRecord = {
+          ...disputeData,
+          id: `disp-${Date.now()}`,
+          createdAt: new Date().toLocaleString()
+        };
+        set((state) => ({ disputes: [newDispute, ...state.disputes] }));
+      },
+
       logout: () => {
         set({
           isAuthenticated: false,
           hasSelectedLanguage: false,
+          hasSelectedRole: false,
           isOnboarded: false,
           phone: '',
           selectedJobForDetails: null,
@@ -561,6 +675,7 @@ export const useAppStore = create<AppState>()(
         isAuthenticated: state.isAuthenticated,
         phone: state.phone,
         hasSelectedLanguage: state.hasSelectedLanguage,
+        hasSelectedRole: state.hasSelectedRole,
         isOnboarded: state.isOnboarded,
         isAvailableToday: state.isAvailableToday,
         language: state.language,
@@ -570,7 +685,10 @@ export const useAppStore = create<AppState>()(
         jobs: state.jobs,
         workers: state.workers,
         notifications: state.notifications,
-        speechEnabled: state.speechEnabled
+        speechEnabled: state.speechEnabled,
+        chatMessages: state.chatMessages,
+        posters: state.posters,
+        disputes: state.disputes
       })
     }
   )

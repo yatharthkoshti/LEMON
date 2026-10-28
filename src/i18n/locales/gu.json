@@ -449,5 +449,91 @@
     "no_posted_jobs": "હજુ કામ પોસ્ટ થયું નથી. + દબાવો!",
     "quick_stats": "ઝડપી આંકડા",
     "quick_actions": "ઝડપી ક્રિયાઓ"
+  },
+  "onboarding_v2": {
+    "step1_title": "તમે કેવી રીતે કામ કરશો?",
+    "step1_subtitle": "તમે Lemon માં કેવી રીતે જોડાવા માંગો છો તે પસંદ કરો.",
+    "step2_title": "તમારું કામ શું છે?",
+    "step2_subtitle": "તમે જે બધી સ્કિલ્સ કરી શકો તે પસંદ કરો.",
+    "step3_title_individual": "કામ માટે તૈયાર!",
+    "step3_title_group": "તમારી ટીમ ઉમેરો",
+    "step3_subtitle_group": "તમારા {{unitType}} માં સભ્યો ઉમેરો.",
+    "step3_empty": "ટીમ સભ્યો ઉમેરવા 'ઉમેરો' ટેપ કરો",
+    "all_set": "તમે તૈયાર છો!",
+    "all_set_subtitle": "તમારી નજીકના કામ શોધવા તૈયાર.",
+    "continue": "આગળ",
+    "start_finding": "કામ શોધવાનું શરૂ કરો",
+    "add": "ઉમેરો",
+    "invite_via_link": "લિંક દ્વારા આમંત્રણ",
+    "type_individual": "વ્યક્તિગત",
+    "type_group": "જૂથ",
+    "type_family": "કુટુંબ",
+    "type_friends": "મિત્રો",
+    "member_name": "નામ",
+    "per_day": "/દિવસ"
+  },
+  "create_job_v2": {
+    "title": "કામ બનાવો",
+    "job_title_label": "કામનું શીર્ષક",
+    "job_title_placeholder": "દા.ત. બાંધકામ માટે મિસ્ત્રી",
+    "who_needed": "તમને કોની જરૂર છે?",
+    "individuals_only": "માત્ર વ્યક્તિગત",
+    "groups": "જૂથો",
+    "families": "કુટુંબો",
+    "friends": "મિત્રો",
+    "any_mixed": "કોઈપણ/મિશ્ર",
+    "workers_needed": "કુલ જરૂરી મજૂરો",
+    "custom": "કસ્ટમ",
+    "daily_wage_label": "દૈનિક વેતન (દરેક મજૂર)",
+    "review_post": "સમીક્ષા અને પોસ્ટ",
+    "total_workers": "કુલ મજૂરો",
+    "daily_wage": "દૈનિક વેતન",
+    "estimated_total": "અંદાજિત કુલ",
+    "payment_note": "ચુકવણી આ MVP સંસ્કરણમાં સીધી કરવામાં આવશે.",
+    "continue_review": "સમીક્ષા માટે આગળ",
+    "post_now": "હવે કામ પોસ્ટ કરો"
+  },
+  "group_timer": {
+    "active_job_title": "ચાલુ કામ",
+    "active_job_block": "નવા કામ માટે અરજી કરતા પહેલા ચાલુ કામ પૂરું કરો.",
+    "acceptance_pending": "જૂથ સ્વીકૃતિ બાકી",
+    "expired": "જૂથ આમંત્રણ સમાપ્ત",
+    "view_active": "ચાલુ કામ જુઓ",
+    "make_all_accept": "બધાને કામ સ્વીકારવાનું કહો",
+    "accepted": "સ્વીકૃત",
+    "pending": "બાકી",
+    "timer_remaining": "{{time}} બાકી"
+  },
+  "work_unit": {
+    "individual": "વ્યક્તિગત",
+    "group": "જૂથ",
+    "family": "કુટુંબ",
+    "friends": "મિત્રો",
+    "mixed": "મિશ્ર",
+    "any": "કોઈપણ"
+  },
+  "transport": {
+    "provided": "પરિવહન ઉપલબ્ધ",
+    "not_provided": "પોતાનું પરિવહન",
+    "toggle_label": "પરિવહન"
+  },
+  "dispute": {
+    "report_title": "વિવાદની જાણ કરો",
+    "report_desc": "જો નોકરીદાતાએ ચૂકવણી ન કરી હોય અથવા કોઈ સમસ્યા હોય",
+    "reason_label": "શું થયું?",
+    "reason_no_payment": "નોકરીદાતાએ ચૂકવણી નથી કરી",
+    "reason_wrong_wage": "નક્કી કર્યા કરતા ઓછું ચૂકવ્યું",
+    "reason_unsafe": "અસુરક્ષિત કામ કરવાની પરિસ્થિતિ",
+    "reason_other": "અન્ય સમસ્યા",
+    "submit": "રિપોર્ટ સબમિટ કરો",
+    "success": "વિવાદની સફળતાપૂર્વક જાણ કરવામાં આવી"
+  },
+  "role_selection": {
+    "title": "તમે લેમનનો ઉપયોગ કેવી રીતે કરશો?",
+    "worker_title": "હું કામદાર છું",
+    "worker_desc": "મારી આસપાસ કામ શોધો",
+    "poster_title": "હું જોબ પોસ્ટર છું",
+    "poster_desc": "કામ આપો અને કારીગરો રાખો",
+    "continue": "આગળ વધો"
   }
 }

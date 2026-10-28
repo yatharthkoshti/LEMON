@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, Mail, Phone, MapPin, ShieldCheck, LogOut, Edit3, ArrowLeftRight, Check } from 'lucide-react';
+import { Building2, Mail, Phone, MapPin, ShieldCheck, LogOut, Edit3, Check } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Button } from '../../components/ui/Button';
 import { Dialog } from '../../components/ui/Dialog';
@@ -11,7 +11,7 @@ interface PosterProfileScreenProps {
 
 export const PosterProfileScreen: React.FC<PosterProfileScreenProps> = ({ onOpenRoleModal }) => {
   const { t } = useTranslation();
-  const { posterProfile, updatePosterProfile, setPortal, logout, showToast } = useAppStore();
+  const { posterProfile, updatePosterProfile, logout, showToast } = useAppStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(posterProfile.name);
@@ -137,24 +137,6 @@ export const PosterProfileScreen: React.FC<PosterProfileScreenProps> = ({ onOpen
             </div>
           </div>
         )}
-      </div>
-
-      {/* Switch to Worker Portal card */}
-      <div className="bg-card rounded-3xl p-5 border border-gray-100 shadow-soft flex items-center justify-between">
-        <div>
-          <h4 className="text-sm font-bold text-primary">શ્રમિક એપ્લિકેશન પર જાઓ</h4>
-          <p className="text-xs text-secondary mt-0.5">કામ શોધવા માટે શ્રમિક મોડમાં સ્વિચ કરો</p>
-        </div>
-        <Button
-          size="md"
-          variant="accent"
-          fullWidth={false}
-          onClick={() => setPortal('worker')}
-          leftIcon={<ArrowLeftRight className="w-4 h-4" />}
-          className="px-4 text-xs font-bold"
-        >
-          સ્વિચ કરો
-        </Button>
       </div>
 
       {/* Logout button */}

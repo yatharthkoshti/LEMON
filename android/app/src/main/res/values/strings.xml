@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LEMON</string>
+    <string name="title_activity_main">LEMON</string>
+    <string name="package_name">com.lemon.app</string>
+    <string name="custom_url_scheme">com.lemon.app</string>
+</resources>

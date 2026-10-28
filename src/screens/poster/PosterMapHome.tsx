@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AlertCircle, Briefcase, CheckCircle2, Clock, MapPin, Navigation, Plus, PlusCircle, Sparkles, Users
+  AlertCircle, Briefcase, CheckCircle2, Clock, MapPin, Navigation, Plus, PlusCircle, Sparkles, Users, Phone
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { OpenStreetMap } from '../../components/map/OpenStreetMap';
@@ -159,11 +159,18 @@ export const PosterMapHome: React.FC = () => {
               <div className="rounded-3xl border border-gray-100 bg-gray-50 p-4 space-y-3 mb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-accent/30 border-2 border-accent font-heading font-extrabold flex items-center justify-center text-lg">
-                      {selectedWorker.name.substring(0, 2)}
-                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-accent/30 border-2 border-accent flex items-center justify-center text-lg overflow-hidden">
+                          {selectedWorker.photoUrl ? (
+                            <img src={selectedWorker.photoUrl} alt="worker" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="font-heading font-extrabold">{selectedWorker.name.substring(0, 2)}</span>
+                          )}
+                        </div>
                     <div>
                       <h3 className="text-base font-bold text-primary leading-tight">{selectedWorker.name}</h3>
+                        <p className="text-xs text-primary font-semibold flex items-center gap-1 mt-0.5">
+                          <Phone className="w-3 h-3 text-lemonBlue" /> {selectedWorker.phone}
+                        </p>
                       <p className="text-xs text-secondary capitalize">
                         {selectedWorker.skills.map((s) => s.replace('_', ' ')).join(', ')}
                       </p>

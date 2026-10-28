@@ -136,22 +136,22 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenSettings }) 
       </div>
 
       {/* Work Team Details (if group) */}
-      {profile.groupDetails?.isGroup && (
+      {(profile.workUnitType !== 'individual') && (
         <div className="bg-amber-50/70 rounded-3xl p-4 border border-accent/60 shadow-soft space-y-2">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-primary" />
             <h4 className="text-sm font-extrabold text-primary">
-              {profile.groupDetails.teamName || 'શ્રમિક ટીમ'}
+              {(profile.unitName || 'My Team') || 'શ્રમિક ટીમ'}
             </h4>
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-gray-800">
             <div>
               <span className="text-secondary">{t('profile.team_member_count')} </span>
-              <span className="font-bold">{profile.groupDetails.memberCount} સભ્યો</span>
+              <span className="font-bold">{(profile.members.length + 1)} સભ્યો</span>
             </div>
             <div>
               <span className="text-secondary">{t('profile.team_total_wage')} </span>
-              <span className="font-bold">₹{profile.groupDetails.totalDailyWage}</span>
+              <span className="font-bold">₹{(profile.dailyWage + profile.members.reduce((acc, m) => acc + m.wage, 0))}</span>
             </div>
           </div>
         </div>

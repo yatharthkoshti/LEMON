@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Users, Search, Filter, Star, CheckCircle2, Bookmark, 
-  MapPin, ShieldAlert, Check, Plus, ArrowRight 
+  MapPin, ShieldAlert, Check, Plus, ArrowRight, Phone 
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../store/useAppStore';
@@ -91,13 +91,20 @@ export const PosterWorkersScreen: React.FC = () => {
               {/* Header: Initials Avatar Badge (NO Photo), Rating & Shortlist */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-accent/30 border-2 border-accent text-primary font-heading font-extrabold flex items-center justify-center text-lg shadow-2xs">
-                    {worker.name.substring(0, 2)}
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-accent/20 flex items-center justify-center shrink-0">
+                    {worker.photoUrl ? (
+                      <img src={worker.photoUrl} alt={worker.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="font-bold text-sm">{worker.name.substring(0, 2)}</span>
+                    )}
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-primary">
                       {worker.name}
                     </h3>
+                    <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
+                      <Phone className="w-3 h-3" /> {worker.phone}
+                    </p>
                     <span className="text-[11px] font-semibold text-secondary flex items-center gap-1">
                       <MapPin className="w-3 h-3 text-lemonRed" />
                       <span>{worker.city.split(' ')[0]} (૨.૪ કિમી દૂર)</span>
@@ -208,11 +215,18 @@ export const PosterWorkersScreen: React.FC = () => {
         {viewingWorker && (
           <div className="space-y-3 font-body">
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-accent/30 font-heading text-xl font-bold flex items-center justify-center text-primary">
-                {viewingWorker.name.substring(0, 2)}
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-accent/20 flex items-center justify-center shrink-0">
+                {viewingWorker.photoUrl ? (
+                  <img src={viewingWorker.photoUrl} alt={viewingWorker.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-bold text-sm">{viewingWorker.name.substring(0, 2)}</span>
+                )}
               </div>
               <div>
                 <h4 className="text-lg font-bold text-primary">{viewingWorker.name}</h4>
+                <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
+                  <Phone className="w-3 h-3" /> {viewingWorker.phone}
+                </p>
                 <p className="text-xs text-secondary">{viewingWorker.city} • {viewingWorker.experience} વર્ષ અનુભવ</p>
               </div>
             </div>

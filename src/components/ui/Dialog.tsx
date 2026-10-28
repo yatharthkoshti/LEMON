@@ -29,7 +29,7 @@ export const Dialog: React.FC<DialogProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -39,15 +39,14 @@ export const Dialog: React.FC<DialogProps> = ({
             className="fixed inset-0 bg-black/60 backdrop-blur-xs"
           />
 
-          {/* Dialog Container */}
           <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-lg bg-card rounded-t-3xl sm:rounded-3xl shadow-soft-lg border border-gray-100 p-6 z-10 max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-sm bg-card rounded-3xl shadow-soft-lg border border-gray-100 z-10 max-h-[80vh] flex flex-col overflow-hidden"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div className="flex items-center justify-between p-5 pb-3 border-b border-gray-100 shrink-0">
               <h3 className="text-xl font-bold text-primary tracking-tight font-heading">
                 {title}
               </h3>
@@ -59,22 +58,12 @@ export const Dialog: React.FC<DialogProps> = ({
               </button>
             </div>
 
-            <div className="py-4 text-base text-gray-700 leading-relaxed font-body">
+            <div className="px-5 py-4 text-base text-gray-700 leading-relaxed font-body overflow-y-auto flex-1">
               {children}
             </div>
 
             {(confirmText || cancelText) && (
-              <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-gray-100">
-                {cancelText && (
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    onClick={onClose}
-                    disabled={isLoading}
-                  >
-                    {cancelText}
-                  </Button>
-                )}
+              <div className="flex flex-col gap-2 p-5 pt-3 border-t border-gray-100 shrink-0">
                 {confirmText && (
                   <Button
                     variant={confirmVariant}
@@ -83,6 +72,16 @@ export const Dialog: React.FC<DialogProps> = ({
                     isLoading={isLoading}
                   >
                     {confirmText}
+                  </Button>
+                )}
+                {cancelText && (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    onClick={onClose}
+                    disabled={isLoading}
+                  >
+                    {cancelText}
                   </Button>
                 )}
               </div>

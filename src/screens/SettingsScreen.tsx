@@ -17,7 +17,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
   const { t } = useTranslation();
   const { 
     language, setLanguage, logout, showToast, 
-    speechEnabled, toggleSpeechEnabled 
+    speechEnabled, toggleSpeechEnabled, setPortal 
   } = useAppStore();
 
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
@@ -168,6 +168,30 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
             </div>
           </div>
           <span className="text-xs font-bold text-gray-400">PWA v1.0</span>
+        </div>
+
+        {/* Admin Control Center Link */}
+        <div
+          onClick={() => {
+            onBack();
+            setPortal('admin');
+          }}
+          className="p-4 flex items-center justify-between hover:bg-yellow-50/50 cursor-pointer transition-colors bg-amber-50/30"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-gray-900 text-accent flex items-center justify-center font-bold">
+              👑
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-primary">
+                Admin Control Center (સંચાલક ડેશબોર્ડ)
+              </h4>
+              <p className="text-xs text-secondary font-medium">
+                ચુકવણી ચકાસણી, કોન્ટ્રાક્ટર્સ અને જોબ મેનેજમેન્ટ
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
         </div>
 
         {/* Logout */}

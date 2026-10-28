@@ -217,7 +217,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
       {/* Scrollable Content */}
       <div
-        className={`px-4 pb-4 ${isFullyExpanded ? 'overflow-y-auto overscroll-contain' : 'overflow-hidden'}`}
+        className={`px-4 pb-4 ${snap !== 'peek' && !isDragging ? 'overflow-y-auto overscroll-contain' : 'overflow-hidden'}`}
         style={{
           height: Math.max(displayHeight - (peekContent ? 96 : 36), 0),
           WebkitOverflowScrolling: 'touch',

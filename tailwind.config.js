@@ -30,8 +30,8 @@ export default {
         lemonBlue: '#3B82F6',
       },
       fontFamily: {
-        heading: ['Anton', 'sans-serif'],
-        body: ['Arial', '"Noto Sans Gujarati"', '"Noto Sans Devanagari"', 'sans-serif'],
+        heading: ['Inter', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'soft-sm': '0 2px 8px rgba(0, 0, 0, 0.04)',

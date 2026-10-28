@@ -449,5 +449,91 @@
     "no_posted_jobs": "No jobs posted yet. Tap + to create your first job!",
     "quick_stats": "Quick Stats",
     "quick_actions": "Quick Actions"
+  },
+  "onboarding_v2": {
+    "step1_title": "How will you work?",
+    "step1_subtitle": "Choose how you want to join Lemon.",
+    "step2_title": "What is your work?",
+    "step2_subtitle": "Select all the skills you can do.",
+    "step3_title_individual": "Ready to Work!",
+    "step3_title_group": "Add Your Team",
+    "step3_subtitle_group": "Add members to your {{unitType}}.",
+    "step3_empty": "Tap 'Add' to add team members",
+    "all_set": "You're all set!",
+    "all_set_subtitle": "Ready to find jobs near you.",
+    "continue": "Continue",
+    "start_finding": "Start Finding Jobs",
+    "add": "Add",
+    "invite_via_link": "Invite via Link",
+    "type_individual": "Individual",
+    "type_group": "Group",
+    "type_family": "Family",
+    "type_friends": "Friends",
+    "member_name": "Name",
+    "per_day": "/day"
+  },
+  "create_job_v2": {
+    "title": "Create Job",
+    "job_title_label": "Job Title",
+    "job_title_placeholder": "e.g. Mason for construction",
+    "who_needed": "Who do you need?",
+    "individuals_only": "Individuals Only",
+    "groups": "Groups",
+    "families": "Families",
+    "friends": "Friends",
+    "any_mixed": "Any/Mixed",
+    "workers_needed": "Total Workers Needed",
+    "custom": "Custom",
+    "daily_wage_label": "Daily Wage (per worker)",
+    "review_post": "Review & Post",
+    "total_workers": "Total Workers",
+    "daily_wage": "Daily Wage",
+    "estimated_total": "Estimated Total",
+    "payment_note": "Payment will be collected directly from the poster in this MVP version.",
+    "continue_review": "Continue to Review",
+    "post_now": "Post Job Now"
+  },
+  "group_timer": {
+    "active_job_title": "Active Job in Progress",
+    "active_job_block": "You must complete your current job before applying to new ones.",
+    "acceptance_pending": "Group Acceptance Pending",
+    "expired": "Group Invitation Expired",
+    "view_active": "View Active Job",
+    "make_all_accept": "Make all accept the job",
+    "accepted": "Accepted",
+    "pending": "Pending",
+    "timer_remaining": "{{time}} remaining"
+  },
+  "work_unit": {
+    "individual": "Individual",
+    "group": "Group",
+    "family": "Family",
+    "friends": "Friends",
+    "mixed": "Mixed",
+    "any": "Any"
+  },
+  "transport": {
+    "provided": "Transport Included",
+    "not_provided": "Arrange Your Own Transport",
+    "toggle_label": "Transportation"
+  },
+  "dispute": {
+    "report_title": "Report Dispute",
+    "report_desc": "If the employer didn't pay or there was an issue",
+    "reason_label": "What happened?",
+    "reason_no_payment": "Employer didn't pay",
+    "reason_wrong_wage": "Paid less than agreed",
+    "reason_unsafe": "Unsafe working conditions",
+    "reason_other": "Other issue",
+    "submit": "Submit Report",
+    "success": "Dispute reported successfully"
+  },
+  "role_selection": {
+    "title": "How will you use Lemon?",
+    "worker_title": "I'm a Worker",
+    "worker_desc": "Find jobs near me",
+    "poster_title": "I'm a Job Poster",
+    "poster_desc": "Post jobs & hire workers",
+    "continue": "Continue"
   }
 }
