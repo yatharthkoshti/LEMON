@@ -3,6 +3,7 @@ import { Job, NotificationItem } from '../types';
 export const INITIAL_JOBS: Job[] = [
   {
     id: 'job-101',
+    targetDate: '2026-11-18',
     title: 'રાજ મિસ્ત્રી અને પ્લાસ્ટર કામ (Raj Mistri Construction)',
     company: 'શિવાલય ઇન્ફ્રાસ્ટ્રક્ચર (Shivalay Infra)',
     posterId: 'poster-01',
@@ -53,6 +54,7 @@ export const INITIAL_JOBS: Job[] = [
   },
   {
     id: 'job-102',
+    targetDate: '2026-11-18',
     title: 'ઇટાલિયન માર્બલ & ટાઇલ્સ ફિટિંગ (Tiles Karigar)',
     company: 'પટેલ એન્ડ સન્સ કન્સ્ટ્રક્શન (Patel & Sons)',
     posterId: 'poster-02',
@@ -103,6 +105,7 @@ export const INITIAL_JOBS: Job[] = [
   },
   {
     id: 'job-103',
+    targetDate: '2026-11-19',
     title: 'સામાન્ય કન્સ્ટ્રક્શન મજૂરી અને સાઇટ હેલ્પ (General Labour)',
     company: 'અમદાવાદ મેટ્રો ફેઝ-૨ પ્રોજેક્ટ',
     posterId: 'poster-01',
@@ -144,6 +147,7 @@ export const INITIAL_JOBS: Job[] = [
   },
   {
     id: 'job-104',
+    targetDate: '2026-11-19',
     title: 'ઘર કલરકામ અને પુટ્ટી વર્ક (Painter)',
     company: 'શ્રીજી હોમ ડેકોર (Shreeji Decor)',
     posterId: 'poster-03',

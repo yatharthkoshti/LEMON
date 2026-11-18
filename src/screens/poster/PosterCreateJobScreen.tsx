@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,14 +6,16 @@ import {
   Users, User, Home, Heart, Combine,
   Car, Footprints, Mic, FileText, Upload,
   AlertCircle, Copy, CheckCircle2, Plus, Trash2,
-  IndianRupee
+  IndianRupee, Calendar
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Button } from '../../components/ui/Button';
+import { DateSelectorBar } from '../../components/ui/DateSelectorBar';
 import { RequestedUnitType, WorkerRoleSlot } from '../../types';
 import { usePosterMenu } from '../../components/poster/PosterLayout';
 import { VoiceRecorder } from '../../components/ui/VoiceRecorder';
 import { uploadMediaToS3 } from '../../utils/s3Upload';
+import { formatDateToIso } from '../../utils/dateUtils';
 import paymentQr from '../../assets/payment-qr.jpg';
 
 const UNIT_TYPES: { id: RequestedUnitType; icon: any; label: string }[] = [
@@ -41,7 +43,8 @@ const COMMON_ROLES = [
 const UPI_ID = 'koshtiyatharth7777-1@okicici';
 
 export const PosterCreateJobScreen: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language || 'gu';
   const { createJob, setPosterTab, showToast } = useAppStore();
   const { openMenu } = usePosterMenu();
   const [step, setStep] = useState(1);
@@ -51,6 +54,10 @@ export const PosterCreateJobScreen: React.FC = () => {
   const [location, setLocation] = useState('');
   const [unitTypes, setUnitTypes] = useState<RequestedUnitType[]>(['any']);
   const [transportProvided, setTransportProvided] = useState<boolean>(true);
+
+  // Hotel-style date selection for the job
+  const todayIso = useMemo(() => formatDateToIso(new Date()), []);
+  const [targetDate, setTargetDate] = useState<string>(todayIso);
 
   // ── Step 2: Workers & Roles ────────────────────────────────────────────
   // Each slot = { role, count, dailyWage }
@@ -116,6 +123,22 @@ export const PosterCreateJobScreen: React.FC = () => {
     }
   };
 
+  // Convert targetDate to friendly display string
+  const formatFriendlyDate = (isoStr: string) => {
+    const today = formatDateToIso(new Date());
+    const tmrwDate = new Date();
+    tmrwDate.setDate(tmrwDate.getDate() + 1);
+    const tmrw = formatDateToIso(tmrwDate);
+
+    if (isoStr === today) {
+      return currentLang === 'gu' ? 'આજે (Today)' : currentLang === 'hi' ? 'आज (Today)' : 'Today';
+    }
+    if (isoStr === tmrw) {
+      return currentLang === 'gu' ? 'આવતીકાલે (Tomorrow)' : currentLang === 'hi' ? 'कल (Tomorrow)' : 'Tomorrow';
+    }
+    return isoStr;
+  };
+
   const publishJob = () => {
     if (!paymentScreenshotUrl) {
       showToast(`₹${platformPostingFee} ની ચુકવણીનો screenshot અપલોડ કરો`, 'error');
@@ -140,6 +163,8 @@ export const PosterCreateJobScreen: React.FC = () => {
       adminApproved: false,
       workerRoles: workerSlots,
       location: location || 'Location TBD',
+      targetDate: targetDate,
+      date: formatFriendlyDate(targetDate),
     });
 
     showToast(`✓ Job posted! Admin reviewing ₹${platformPostingFee} payment.`, 'success');
@@ -171,11 +196,32 @@ export const PosterCreateJobScreen: React.FC = () => {
       <div className="p-4 max-w-lg mx-auto space-y-4">
         <AnimatePresence mode="wait">
 
-          {/* ── STEP 1: Job Basics ── */}
+          {/* ── STEP 1: Job Basics & Date Selection ── */}
           {step === 1 && (
-            <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+            <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
               <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-4">
                 <h2 className="font-heading font-bold text-xl text-primary">📋 Job Details</h2>
+
+                {/* Hotel-Style Date Selector */}
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-primary" />
+                      કામની તારીખ (Work Date) *
+                    </span>
+                    <span className="text-primary font-black text-xs">
+                      {formatFriendlyDate(targetDate)}
+                    </span>
+                  </label>
+                  <div className="bg-gray-50/70 p-2 rounded-2xl border border-gray-200">
+                    <DateSelectorBar
+                      selectedDate={targetDate}
+                      onSelectDate={setTargetDate}
+                      showAllOption={false}
+                      compact={true}
+                    />
+                  </div>
+                </div>
 
                 {/* Title */}
                 <div>

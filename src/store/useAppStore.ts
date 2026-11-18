@@ -466,6 +466,7 @@ export const useAppStore = create<AppState>()(
           location: newJobData.location || 'એસ.જી. હાઇવે, અમદાવાદ',
           distanceKm: 2.5,
           date: newJobData.date || 'આજે (Today)',
+          targetDate: newJobData.targetDate,
           time: newJobData.time || '૦૮:૩૦ સવારે - ૦૫:૩૦ સાંજે',
           dailyWage: wage,
           transportProvided: newJobData.transportProvided ?? true,

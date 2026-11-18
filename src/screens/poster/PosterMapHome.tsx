@@ -1,14 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AlertCircle, Briefcase, CheckCircle2, Clock, MapPin, Navigation, Plus, PlusCircle, Sparkles, Users, Phone
+  AlertCircle, Briefcase, CheckCircle2, Clock, MapPin, Navigation, Plus, PlusCircle, Sparkles, Users, Phone, Calendar
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { OpenStreetMap } from '../../components/map/OpenStreetMap';
 import { BottomSheet, SheetTabs, SnapPoint } from '../../components/ui/BottomSheet';
 import { Button } from '../../components/ui/Button';
+import { DateSelectorBar } from '../../components/ui/DateSelectorBar';
 import { Job, WorkerProfile } from '../../types';
 import { usePosterMenu } from '../../components/poster/PosterLayout';
+import { formatDateToIso, matchesJobDate } from '../../utils/dateUtils';
 
 export const PosterMapHome: React.FC = () => {
   const { t } = useTranslation();
@@ -26,15 +28,40 @@ export const PosterMapHome: React.FC = () => {
   const [selectedWorker, setSelectedWorker] = useState<WorkerProfile | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [sheetSnap, setSheetSnap] = useState<SnapPoint>('peek');
-  const [sheetTab, setSheetTab] = useState('workers');
+  const [sheetTab, setSheetTab] = useState('jobs'); // default to jobs so poster immediately sees their postings
   const [mapCenter, setMapCenter] = useState<[number, number]>([
     posterProfile.locationCoords.lat,
     posterProfile.locationCoords.lng,
   ]);
 
-  const todaysJobs = jobs.filter((j) => j.date.includes('આજે') || j.date.includes('Today'));
-  const upcomingJobs = jobs.filter((j) => !j.date.includes('આજે') && !j.date.includes('Today'));
-  const pendingPaymentJobs = jobs.filter((j) => j.paymentStatus === 'pending');
+  // Date selection state: default to 'today' (ISO string of current day)
+  const todayIso = useMemo(() => formatDateToIso(new Date()), []);
+  const [selectedDate, setSelectedDate] = useState<string>(todayIso);
+
+  // Filter jobs by selected date
+  const dateFilteredJobs = useMemo(() => {
+    return jobs.filter((job) => matchesJobDate(job, selectedDate));
+  }, [jobs, selectedDate]);
+
+  // Count jobs per date for badges
+  const jobCountByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    jobs.forEach((job) => {
+      if (job.targetDate) {
+        counts[job.targetDate] = (counts[job.targetDate] || 0) + 1;
+      } else {
+        const dLower = (job.date || '').toLowerCase();
+        if (dLower.includes('આજે') || dLower.includes('today')) {
+          counts[todayIso] = (counts[todayIso] || 0) + 1;
+        }
+      }
+    });
+    return counts;
+  }, [jobs, todayIso]);
+
+  const todaysJobs = jobs.filter((j) => matchesJobDate(j, todayIso));
+  const upcomingJobs = jobs.filter((j) => !matchesJobDate(j, todayIso));
+  const pendingPaymentJobs = jobs.filter((j) => j.paymentStatus === 'pending' || j.paymentStatus === 'pending_verification');
   const totalAssignedWorkers = jobs.reduce((acc, j) => acc + j.workersAssignedCount, 0);
 
   const handleSelectWorker = (worker: WorkerProfile) => {
@@ -54,7 +81,7 @@ export const PosterMapHome: React.FC = () => {
   };
 
   const handleAssign = (workerId: string) => {
-    const target = selectedJob || jobs[0];
+    const target = selectedJob || dateFilteredJobs[0] || jobs[0];
     if (!target) return;
     assignWorkerToJob(target.id, workerId);
     showToast(t('map_home_poster.assign_worker'), 'success');
@@ -68,11 +95,11 @@ export const PosterMapHome: React.FC = () => {
 
   const sheetTabs = useMemo(
     () => [
+      { id: 'jobs', label: t('map_home_poster.tab_my_jobs'), badge: dateFilteredJobs.length },
       { id: 'workers', label: t('map_home_poster.tab_workers'), badge: workers.length },
-      { id: 'jobs', label: t('map_home_poster.tab_my_jobs'), badge: jobs.length },
       { id: 'dashboard', label: t('map_home_poster.tab_dashboard') },
     ],
-    [t, workers.length, jobs.length]
+    [t, dateFilteredJobs.length, workers.length]
   );
 
   return (
@@ -82,7 +109,7 @@ export const PosterMapHome: React.FC = () => {
           center={mapCenter}
           zoom={13}
           workers={workers}
-          jobs={jobs}
+          jobs={dateFilteredJobs}
           selectedWorkerId={selectedWorker?.id}
           selectedJobId={selectedJob?.id}
           onSelectWorker={handleSelectWorker}
@@ -91,32 +118,47 @@ export const PosterMapHome: React.FC = () => {
         />
       </div>
 
-      <div className="absolute top-0 left-0 right-0 z-20 pt-[max(12px,env(safe-area-inset-top))] px-3 pointer-events-none">
-        <div className="max-w-[430px] mx-auto flex items-start justify-between gap-2">
-          <button
-            type="button"
-            onClick={openMenu}
-            className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-soft px-3 py-2 flex items-center gap-2"
-          >
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-lg">🍋</span>
-            </div>
-            <div className="text-left">
-              <p className="font-heading text-lg leading-none text-primary">LEMON</p>
-              <p className="text-[10px] font-bold text-secondary truncate max-w-[140px]">
-                {posterProfile.companyName}
-              </p>
-            </div>
-          </button>
+      {/* Top Header & Hotel-Booking Style Date Selector for Job Poster */}
+      <div className="absolute top-0 left-0 right-0 z-20 pt-[max(10px,env(safe-area-inset-top))] px-3 pointer-events-none">
+        <div className="max-w-[430px] mx-auto space-y-2">
+          {/* Top Brand Bar */}
+          <div className="flex items-start justify-between gap-2">
+            <button
+              type="button"
+              onClick={openMenu}
+              className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-soft px-3 py-2 flex items-center gap-2"
+            >
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-lg">🍋</span>
+              </div>
+              <div className="text-left">
+                <p className="font-heading text-lg leading-none text-primary">LEMON</p>
+                <p className="text-[10px] font-bold text-secondary truncate max-w-[140px]">
+                  {posterProfile.companyName || 'Job Poster'}
+                </p>
+              </div>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setPosterTab('create_job')}
-            className="pointer-events-auto flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-primary text-white text-xs font-black shadow-soft"
-          >
-            <Plus className="w-4 h-4 text-accent" />
-            {t('map_home_poster.create_job_fab')}
-          </button>
+            <button
+              type="button"
+              onClick={() => setPosterTab('create_job')}
+              className="pointer-events-auto flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-primary text-white text-xs font-black shadow-soft hover:bg-primary/90 transition-transform active:scale-95"
+            >
+              <Plus className="w-4 h-4 text-accent" />
+              {t('map_home_poster.create_job_fab')}
+            </button>
+          </div>
+
+          {/* Hotel-Style Date Selector Strip */}
+          <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-soft p-1.5 border border-white/60">
+            <DateSelectorBar
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              showAllOption={true}
+              jobCountByDate={jobCountByDate}
+              compact={true}
+            />
+          </div>
         </div>
       </div>
 
@@ -138,10 +180,10 @@ export const PosterMapHome: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-black text-primary">
-                {t('map_home_poster.workers_nearby', { count: workers.length })}
+                {t('map_home_poster.active_jobs', { count: dateFilteredJobs.length })}
               </p>
               <p className="text-[11px] font-semibold text-secondary">
-                {t('map_home_poster.active_jobs', { count: jobs.length })}
+                {t('map_home_poster.workers_nearby', { count: workers.length })}
               </p>
             </div>
             <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
@@ -153,41 +195,84 @@ export const PosterMapHome: React.FC = () => {
       >
         <SheetTabs tabs={sheetTabs} activeTab={sheetTab} onTabChange={setSheetTab} />
 
+        {sheetTab === 'jobs' && (
+          <div className="space-y-2">
+            {dateFilteredJobs.length === 0 ? (
+              <div className="py-8 text-center space-y-3">
+                <Calendar className="w-8 h-8 text-gray-300 mx-auto" />
+                <p className="text-sm font-bold text-primary">આ તારીખે કોઈ જોબ પોસ્ટ કરેલ નથી</p>
+                <p className="text-xs text-gray-400">
+                  આ તારીખ માટે નવી જોબ બનાવો અથવા ઉપરથી બીજી તારીખ પસંદ કરો.
+                </p>
+                <Button size="md" onClick={() => setPosterTab('create_job')} leftIcon={<PlusCircle className="w-4 h-4 text-accent" />}>
+                  {t('map_home_poster.create_job_fab')}
+                </Button>
+              </div>
+            ) : (
+              dateFilteredJobs.map((job) => (
+                <button
+                  key={job.id}
+                  type="button"
+                  onClick={() => handleSelectJob(job)}
+                  className={`w-full text-left p-3.5 rounded-2xl border-2 transition-all ${
+                    selectedJob?.id === job.id ? 'bg-amber-50 border-primary shadow-soft' : 'bg-white border-gray-100 hover:border-gray-200'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-bold text-primary truncate">{job.title}</p>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                          job.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {job.paymentStatus === 'paid' ? 'Paid' : 'Verification Pending'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-semibold text-secondary flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{job.location}</span>
+                      </p>
+                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                        <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
+                          {job.workersAssignedCount}/{job.workersRequired} {t('poster_nav.workers')}
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-semibold flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-primary" />
+                          {job.date}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="font-heading text-lg text-primary shrink-0">₹{job.dailyWage}</p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+
         {sheetTab === 'workers' && (
           <div className="space-y-2">
             {selectedWorker && (
               <div className="rounded-3xl border border-gray-100 bg-gray-50 p-4 space-y-3 mb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-accent/30 border-2 border-accent flex items-center justify-center text-lg overflow-hidden">
-                          {selectedWorker.photoUrl ? (
-                            <img src={selectedWorker.photoUrl} alt="worker" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="font-heading font-extrabold">{selectedWorker.name.substring(0, 2)}</span>
-                          )}
-                        </div>
+                    <div className="w-12 h-12 rounded-2xl bg-primary text-white font-heading text-lg font-bold flex items-center justify-center">
+                      {selectedWorker.name.substring(0, 2)}
+                    </div>
                     <div>
-                      <h3 className="text-base font-bold text-primary leading-tight">{selectedWorker.name}</h3>
-                        <p className="text-xs text-primary font-semibold flex items-center gap-1 mt-0.5">
-                          <Phone className="w-3 h-3 text-lemonBlue" /> {selectedWorker.phone}
-                        </p>
-                      <p className="text-xs text-secondary capitalize">
-                        {selectedWorker.skills.map((s) => s.replace('_', ' ')).join(', ')}
+                      <p className="font-heading text-base font-bold text-primary">{selectedWorker.name}</p>
+                      <p className="text-xs text-secondary capitalize">{selectedWorker.skills.join(', ')}</p>
+                      <p className="text-xs font-semibold text-emerald-700 mt-0.5">
+                        ★ {selectedWorker.rating} • {selectedWorker.attendanceRate}% {t('workers.attendance')}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-heading text-xl text-primary">₹{selectedWorker.dailyWage}</span>
-                  </div>
+                  <p className="font-heading text-lg font-bold text-primary">₹{selectedWorker.dailyWage}</p>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-semibold bg-white p-2 rounded-2xl">
-                  <div>⭐ {selectedWorker.rating}</div>
-                  <div className="text-emerald-700">{selectedWorker.attendanceRate}%</div>
-                  <div>{selectedWorker.experience} yr</div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="md"
                     onClick={() => toggleShortlistWorker(selectedWorker.id)}
                   >
@@ -244,44 +329,6 @@ export const PosterMapHome: React.FC = () => {
           </div>
         )}
 
-        {sheetTab === 'jobs' && (
-          <div className="space-y-2">
-            {jobs.length === 0 ? (
-              <div className="py-8 text-center space-y-3">
-                <p className="text-sm font-semibold text-gray-400">{t('map_home_poster.no_posted_jobs')}</p>
-                <Button size="md" onClick={() => setPosterTab('create_job')} leftIcon={<PlusCircle className="w-4 h-4 text-accent" />}>
-                  {t('map_home_poster.create_job_fab')}
-                </Button>
-              </div>
-            ) : (
-              jobs.map((job) => (
-                <button
-                  key={job.id}
-                  type="button"
-                  onClick={() => handleSelectJob(job)}
-                  className={`w-full text-left p-3.5 rounded-2xl border-2 ${
-                    selectedJob?.id === job.id ? 'bg-amber-50 border-primary' : 'bg-white border-gray-100'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-primary truncate">{job.title}</p>
-                      <p className="text-[11px] font-semibold text-secondary flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{job.location}</span>
-                      </p>
-                      <p className="text-[11px] font-bold mt-1">
-                        {job.workersAssignedCount}/{job.workersRequired} {t('poster_nav.workers')}
-                      </p>
-                    </div>
-                    <p className="font-heading text-lg text-primary">₹{job.dailyWage}</p>
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        )}
-
         {sheetTab === 'dashboard' && (
           <div className="space-y-4">
             <p className="text-xs font-black uppercase tracking-wide text-secondary">
@@ -311,26 +358,10 @@ export const PosterMapHome: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPosterTab('workers')}
-                className="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-left text-xs font-bold h-24 flex flex-col justify-between"
+                className="p-4 rounded-2xl bg-white border border-gray-100 text-left text-xs font-bold h-24 flex flex-col justify-between shadow-soft"
               >
-                <Users className="w-5 h-5" />
-                {t('poster_overview.btn_view_workers')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPosterTab('jobs')}
-                className="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-left text-xs font-bold h-24 flex flex-col justify-between"
-              >
-                <Briefcase className="w-5 h-5" />
-                {t('poster_overview.btn_view_jobs')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPosterTab('analytics')}
-                className="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-left text-xs font-bold h-24 flex flex-col justify-between"
-              >
-                <CheckCircle2 className="w-5 h-5" />
-                {t('poster_nav.analytics')}
+                <Users className="w-5 h-5 text-primary" />
+                {t('poster_overview.btn_browse_workers')}
               </button>
             </div>
           </div>
@@ -345,9 +376,13 @@ const Stat: React.FC<{ icon: React.ReactNode; label: string; value: string | num
   label,
   value,
 }) => (
-  <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
-    <div className="flex items-center gap-1.5 text-secondary mb-1">{icon}</div>
-    <p className="text-[10px] font-bold text-secondary truncate">{label}</p>
-    <p className="font-heading text-xl text-primary">{value}</p>
+  <div className="p-3 rounded-2xl bg-white border border-gray-100 flex items-center gap-3">
+    <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-primary">
+      {icon}
+    </div>
+    <div>
+      <p className="font-heading text-lg font-bold text-primary leading-none">{value}</p>
+      <p className="text-[10px] text-secondary font-semibold mt-0.5">{label}</p>
+    </div>
   </div>
 );

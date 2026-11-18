@@ -99,6 +99,7 @@ export interface Job {
   location: string;
   distanceKm: number;
   date: string;
+  targetDate?: string; // Standard ISO date 'YYYY-MM-DD' for date filtering
   time: string;
   dailyWage: number;
   transportProvided: boolean;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Briefcase, Calendar, Clock, MapPin, Users, Copy, 
   Trash2, XCircle, Eye, AlertCircle, CheckCircle2, ChevronRight 
@@ -8,6 +8,8 @@ import { useAppStore } from '../../store/useAppStore';
 import { Job, JobStatus } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Dialog } from '../../components/ui/Dialog';
+import { DateSelectorBar } from '../../components/ui/DateSelectorBar';
+import { formatDateToIso, matchesJobDate } from '../../utils/dateUtils';
 
 interface PosterJobsScreenProps {
   onViewJobDetail: (job: Job) => void;
@@ -18,17 +20,45 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
   const { jobs, duplicateJob, cancelJob, deleteJob, showToast } = useAppStore();
 
   const [activeTab, setActiveTab] = useState<'all' | 'today' | 'upcoming' | 'completed' | 'cancelled' | 'pending_payment'>('all');
+  const [selectedDate, setSelectedDate] = useState<string>('all');
   const [selectedJobForDelete, setSelectedJobForDelete] = useState<Job | null>(null);
   const [selectedJobForCancel, setSelectedJobForCancel] = useState<Job | null>(null);
 
-  const filteredJobs = jobs.filter((job) => {
-    if (activeTab === 'today') return job.date.includes('આજે') || job.date.includes('Today');
-    if (activeTab === 'upcoming') return job.status === 'upcoming';
-    if (activeTab === 'completed') return job.status === 'completed';
-    if (activeTab === 'cancelled') return job.status === 'cancelled';
-    if (activeTab === 'pending_payment') return job.paymentStatus === 'pending';
-    return true;
-  });
+  const todayIso = useMemo(() => formatDateToIso(new Date()), []);
+
+  // Job counts for date badges
+  const jobCountByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    jobs.forEach((job) => {
+      if (job.targetDate) {
+        counts[job.targetDate] = (counts[job.targetDate] || 0) + 1;
+      } else {
+        const dLower = (job.date || '').toLowerCase();
+        if (dLower.includes('આજે') || dLower.includes('today')) {
+          counts[todayIso] = (counts[todayIso] || 0) + 1;
+        }
+      }
+    });
+    return counts;
+  }, [jobs, todayIso]);
+
+  // Filter jobs by both status tab AND selected date
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => {
+      // 1. Date filter
+      if (selectedDate !== 'all') {
+        if (!matchesJobDate(job, selectedDate)) return false;
+      }
+
+      // 2. Status tab filter
+      if (activeTab === 'today') return matchesJobDate(job, todayIso);
+      if (activeTab === 'upcoming') return job.status === 'upcoming';
+      if (activeTab === 'completed') return job.status === 'completed';
+      if (activeTab === 'cancelled') return job.status === 'cancelled';
+      if (activeTab === 'pending_payment') return job.paymentStatus === 'pending' || job.paymentStatus === 'pending_verification';
+      return true;
+    });
+  }, [jobs, selectedDate, activeTab, todayIso]);
 
   const handleDuplicate = (job: Job) => {
     duplicateJob(job.id);
@@ -52,7 +82,7 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
   };
 
   return (
-    <div className="space-y-5 pb-20">
+    <div className="space-y-4 pb-20">
       {/* Title */}
       <div>
         <h2 className="text-2xl font-extrabold text-primary font-heading tracking-tight">
@@ -63,7 +93,32 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
         </p>
       </div>
 
-      {/* Tabs */}
+      {/* Hotel-Style Date Selector */}
+      <div className="bg-white rounded-3xl p-2 border border-gray-100 shadow-2xs">
+        <div className="flex items-center justify-between px-2 pt-1 pb-1.5">
+          <span className="text-[11px] font-black uppercase text-secondary tracking-wider flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-primary" />
+            તારીખ મુજબ ફિલ્ટર (Filter By Date)
+          </span>
+          {selectedDate !== 'all' && (
+            <button
+              onClick={() => setSelectedDate('all')}
+              className="text-[11px] font-bold text-primary underline"
+            >
+              બધા દિવસ (Show All)
+            </button>
+          )}
+        </div>
+        <DateSelectorBar
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          showAllOption={true}
+          jobCountByDate={jobCountByDate}
+          compact={true}
+        />
+      </div>
+
+      {/* Status Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
         {[
           { id: 'all', labelKey: 'poster_jobs.filter_all' },
@@ -77,7 +132,7 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all border ${
+              className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border ${
                 isActive
                   ? 'bg-primary text-white border-primary shadow-soft'
                   : 'bg-card text-secondary-dark border-gray-200 hover:border-gray-300'
@@ -108,9 +163,9 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
                       <span className="text-xs font-bold text-secondary uppercase">
                         {job.category}
                       </span>
-                      {job.paymentStatus === 'pending' ? (
-                        <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-red-100 text-lemonRed border border-red-200">
-                          ચુકવણી બાકી (Payment Pending)
+                      {job.paymentStatus === 'pending' || job.paymentStatus === 'pending_verification' ? (
+                        <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                          {job.paymentStatus === 'pending_verification' ? 'ચકાસણી બાકી (Pending Approval)' : 'ચુકવણી બાકી (Payment Pending)'}
                         </span>
                       ) : (
                         <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
@@ -140,89 +195,130 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
                   </div>
                 </div>
 
-                {/* Location, Date, Time */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-semibold text-gray-700 bg-gray-50 p-3 rounded-2xl">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <MapPin className="w-3.5 h-3.5 text-lemonRed shrink-0" />
-                    <span className="truncate">{job.location}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span>{job.date}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span>{job.time}</span>
-                  </div>
+                {/* Info row */}
+                <div className="flex items-center gap-4 text-xs font-semibold text-secondary flex-wrap">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-primary" />
+                    {job.date}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-primary" />
+                    {job.time}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                    {job.location}
+                  </span>
                 </div>
 
-                {/* Workers Status Pills */}
-                <div className="flex items-center justify-between text-xs font-bold pt-1">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary" />
-                    <span>{t('poster_jobs.workers_count', { assigned: job.workersAssignedCount, total: job.workersRequired })}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                      {acceptedWorkersCount} કન્ફર્મ
+                {/* Worker quota bar */}
+                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-secondary flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5 text-primary" />
+                      શ્રમિકોની સ્થિતિ (Workers Status)
                     </span>
-                    {pendingWorkersCount > 0 && (
-                      <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">
-                        {pendingWorkersCount} બાકી
-                      </span>
-                    )}
+                    <span className="text-primary">
+                      {job.workersAssignedCount} / {job.workersRequired} જરૂરિયાત
+                    </span>
+                  </div>
+
+                  {/* Progress track */}
+                  <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden flex">
+                    <div
+                      style={{ width: `${(acceptedWorkersCount / job.workersRequired) * 100}%` }}
+                      className="bg-emerald-500 h-full"
+                    />
+                    <div
+                      style={{ width: `${(pendingWorkersCount / job.workersRequired) * 100}%` }}
+                      className="bg-amber-400 h-full"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 pt-1">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      હાજર / પુષ્ટિ થયેલ: <strong>{acceptedWorkersCount}</strong>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-400" />
+                      અરજી / આમંત્રણ: <strong>{pendingWorkersCount}</strong>
+                    </span>
+                    <span>
+                      બાકી જગ્યા: <strong>{Math.max(0, job.workersRequired - job.workersAssignedCount)}</strong>
+                    </span>
                   </div>
                 </div>
 
-                {/* Actions: View, Duplicate, Cancel, Delete */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100 gap-2">
-                  <Button
-                    size="md"
-                    variant="primary"
-                    fullWidth={false}
-                    onClick={() => onViewJobDetail(job)}
-                    className="!min-h-[40px] px-4 text-xs"
-                    leftIcon={<Eye className="w-4 h-4 text-accent" />}
-                  >
-                    {t('poster_jobs.action_view')}
-                  </Button>
-
-                  <div className="flex items-center gap-1">
-                    <button
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="md"
                       onClick={() => handleDuplicate(job)}
-                      className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
-                      title={t('poster_jobs.action_duplicate')}
+                      leftIcon={<Copy className="w-3.5 h-3.5" />}
                     >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                    {job.status !== 'cancelled' && (
-                      <button
+                      {t('poster_jobs.btn_duplicate')}
+                    </Button>
+
+                    {job.status !== 'cancelled' && job.status !== 'completed' && (
+                      <Button
+                        variant="secondary"
+                        size="md"
                         onClick={() => setSelectedJobForCancel(job)}
-                        className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 transition-colors"
-                        title={t('poster_jobs.action_cancel')}
+                        leftIcon={<XCircle className="w-3.5 h-3.5 text-lemonRed" />}
                       >
-                        <XCircle className="w-4 h-4" />
-                      </button>
+                        {t('poster_jobs.btn_cancel')}
+                      </Button>
                     )}
+
                     <button
+                      type="button"
                       onClick={() => setSelectedJobForDelete(job)}
-                      className="p-2 rounded-xl bg-red-50 hover:bg-red-100 text-lemonRed transition-colors"
-                      title={t('poster_jobs.action_delete')}
+                      className="p-2.5 rounded-xl text-gray-400 hover:text-lemonRed hover:bg-red-50 transition-colors"
+                      aria-label="Delete job"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
+
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => onViewJobDetail(job)}
+                    rightIcon={<ChevronRight className="w-4 h-4" />}
+                  >
+                    {t('poster_jobs.btn_manage')}
+                  </Button>
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="p-12 text-center bg-card rounded-4xl border border-dashed border-gray-200">
-          <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-          <p className="text-sm font-bold text-gray-600">
-            આ શ્રેણીમાં કોઈ કામ મળ્યું નથી.
+        <div className="bg-card rounded-3xl p-10 text-center border border-gray-100 shadow-soft space-y-3">
+          <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
+            <Briefcase className="w-8 h-8" />
+          </div>
+          <h3 className="font-heading text-lg font-bold text-primary">
+            {t('poster_jobs.no_jobs_title')}
+          </h3>
+          <p className="text-xs sm:text-sm text-secondary max-w-sm mx-auto">
+            {selectedDate !== 'all' 
+              ? 'આ તારીખે કોઈ જોબ મળેલ નથી. ઉપરથી અન્ય તારીખ પસંદ કરો અથવા નવી જોબ પોસ્ટ કરો.'
+              : t('poster_jobs.no_jobs_desc')}
           </p>
+          {selectedDate !== 'all' && (
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setSelectedDate('all')}
+              className="mt-2"
+            >
+              બધી જોબ્સ બતાવો (Show All Jobs)
+            </Button>
+          )}
         </div>
       )}
 
@@ -230,14 +326,14 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
       <Dialog
         isOpen={Boolean(selectedJobForCancel)}
         onClose={() => setSelectedJobForCancel(null)}
-        title="કામ રદ કરવું છે?"
-        confirmText="હા, રદ કરો"
-        cancelText="પાછા જાઓ"
-        confirmVariant="danger"
+        title={t('poster_jobs.cancel_dialog_title')}
+        confirmText={t('poster_jobs.cancel_dialog_confirm')}
+        cancelText={t('poster_jobs.cancel_dialog_cancel')}
         onConfirm={handleConfirmCancel}
+        confirmVariant="danger"
       >
-        <p className="text-sm font-semibold text-gray-800">
-          શું તમે ખરેખર "{selectedJobForCancel?.title}" રદ કરવા માંગો છો?
+        <p className="text-sm text-secondary leading-relaxed">
+          {t('poster_jobs.cancel_dialog_message')}
         </p>
       </Dialog>
 
@@ -245,14 +341,14 @@ export const PosterJobsScreen: React.FC<PosterJobsScreenProps> = ({ onViewJobDet
       <Dialog
         isOpen={Boolean(selectedJobForDelete)}
         onClose={() => setSelectedJobForDelete(null)}
-        title="કામ ડિલીટ કરવું છે?"
-        confirmText="ડિલીટ કરો"
-        cancelText="રદ કરો"
-        confirmVariant="danger"
+        title={t('poster_jobs.delete_dialog_title')}
+        confirmText={t('poster_jobs.delete_dialog_confirm')}
+        cancelText={t('poster_jobs.delete_dialog_cancel')}
         onConfirm={handleConfirmDelete}
+        confirmVariant="danger"
       >
-        <p className="text-sm font-semibold text-gray-800">
-          આ કામ કાયમ માટે હટાવી દેવામાં આવશે. શું તમે આગળ વધવા માંગો છો?
+        <p className="text-sm text-secondary leading-relaxed">
+          {t('poster_jobs.delete_dialog_message')}
         </p>
       </Dialog>
     </div>
